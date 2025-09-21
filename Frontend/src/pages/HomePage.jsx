@@ -27,13 +27,11 @@ const HomePage = () => {
           setIsProfileOpen={setIsProfileOpen}
         />
         {isProfileOpen && (
-          <SidebarProvider>
-            <RightSidebar
-              isSelectedUser={isSelectedUser}
-              isProfileOpen={isProfileOpen}
-              setIsProfileOpen={setIsProfileOpen}
-            />
-          </SidebarProvider>
+          <RightSidebar
+            isSelectedUser={isSelectedUser}
+            isProfileOpen={isProfileOpen}
+            setIsProfileOpen={setIsProfileOpen}
+          />
         )}
       </div>
     </div>

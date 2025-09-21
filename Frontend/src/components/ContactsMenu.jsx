@@ -9,7 +9,6 @@ import {
 import { RiArrowLeftSLine } from "react-icons/ri";
 import { IoEllipsisVertical } from "react-icons/io5";
 import logo from "../assets/logo.png";
-import ellipsis from "../assets/menu_icon.png";
 import search_icon from "../assets/search_icon.png";
 import avatar_icon from "../assets/avatar_icon.png";
 import { userDummyData } from "../assets/assets";
@@ -23,7 +22,7 @@ const ContactsMenu = ({
   const navigate = useNavigate();
 
   return (
-    <div className="bg-black/20 backdrop-blur-2xl h-full p-5 rounded-r-xl overflow-y-scroll text-white border-r border-gray-600 py-5 px-3">
+    <div className="bg-[#8185B2]/10 backdrop-blur-2xl h-full p-5 rounded-r-xl overflow-y-scroll text-white border-r border-gray-600 py-5 px-3">
       <div
         className={`w-full h-full flex flex-col items-center justify-start gap-5 ${
           isSelectedUser ? "px-2" : "px-4"
