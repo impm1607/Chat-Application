@@ -36,7 +36,7 @@ const LoginPage = () => {
             className="w-full h-full flex flex-col items-center justify-start gap-10 py-11 px-8 border-2 border-gray-600 rounded-lg shadow-2xl bg-white/8 text-white"
             onSubmit={() => onSubmitHandler()}
           >
-            <h2 className="w-full flex justify-between items-center gap-[2px] hover:gap-3 font-medium text-2xl cursor-pointer">
+            <h2 className="w-full flex justify-between items-center gap-[2px] font-medium text-2xl cursor-pointer">
               {currState}
               {isDataSubmitted && (
                 <MdKeyboardArrowLeft
