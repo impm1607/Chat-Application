@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import assets from "../assets/assets";
 import { MdCheck, MdKeyboardArrowLeft } from "react-icons/md";
+import { AuthContext } from "../../context/AuthContext";
 
 const LoginPage = () => {
   const [currState, setCurrState] = useState("Sign Up");
@@ -10,13 +11,22 @@ const LoginPage = () => {
   const [bio, setBio] = useState("");
   const [isDataSubmitted, setIsDataSubmitted] = useState(false);
 
+  const { login } = useContext(AuthContext);
+
   const onSubmitHandler = (e) => {
     e.preventDefault();
 
-    if (currState === "Sign UP" && !isDataSubmitted) {
+    if (currState === "Sign Up" && !isDataSubmitted) {
       setIsDataSubmitted(true);
       return;
     }
+
+    login(currState === "Sign Up" ? "signup" : "login", {
+      fullName,
+      email,
+      password,
+      bio,
+    });
   };
 
   return (
@@ -34,7 +44,7 @@ const LoginPage = () => {
         <div className="w-full h-full flex items-center justify-center px-8 py-16">
           <form
             className="w-full h-full flex flex-col items-center justify-start gap-10 py-11 px-8 border-2 border-gray-600 rounded-lg shadow-2xl bg-white/8 text-white"
-            onSubmit={() => onSubmitHandler()}
+            onSubmit={onSubmitHandler}
           >
             <h2 className="w-full flex justify-between items-center gap-[2px] font-medium text-2xl cursor-pointer">
               {currState}

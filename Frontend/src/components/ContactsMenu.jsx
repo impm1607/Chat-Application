@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext } from "react";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -13,12 +13,14 @@ import search_icon from "../assets/search_icon.png";
 import avatar_icon from "../assets/avatar_icon.png";
 import { userDummyData } from "../assets/assets";
 import { useNavigate } from "react-router-dom";
+import { AuthContext } from "../../context/AuthContext";
 
 const ContactsMenu = ({
   isSelectedUser,
   setIsSelectedUser,
   setIsProfileOpen,
 }) => {
+  const { logout } = useContext(AuthContext);
   const navigate = useNavigate();
 
   return (
@@ -48,7 +50,7 @@ const ContactsMenu = ({
             <DropdownMenuContent
               side="bottom"
               align="end"
-              className="w-32 rounded-md bg-[#282142] border border-gray-600 text-gray-100"
+              className="w-32 rounded-md bg-[#282142] border border-gray-600 text-gray-100 m-2 p-2"
             >
               <DropdownMenuItem
                 className="text-sm cursor-pointer"
@@ -57,9 +59,12 @@ const ContactsMenu = ({
                 Edit Profile
               </DropdownMenuItem>
 
-              <DropdownMenuSeparator className="border-gray-500" />
+              <DropdownMenuSeparator className="border-gray-500 mx-2" />
 
-              <DropdownMenuItem className="text-sm cursor-pointer">
+              <DropdownMenuItem
+                className="text-sm cursor-pointer"
+                onClick={() => logout()}
+              >
                 Logout
               </DropdownMenuItem>
             </DropdownMenuContent>
