@@ -1,5 +1,5 @@
-import React, { useState, useContext } from "react";
-import assets, { imagesDummyData } from "../assets/assets";
+import React, { useState, useContext, useEffect } from "react";
+import assets from "../assets/assets";
 import LightboxModal from "../lib/lightboxmodal";
 import {
   Sidebar,
@@ -8,19 +8,32 @@ import {
 } from "@/components/ui/sidebar";
 import { RxCross2 } from "react-icons/rx";
 import { MdKeyboardArrowRight } from "react-icons/md";
+import { AuthContext } from "../../context/AuthContext";
 import { ChatContext } from "../../context/ChatContext";
 
 const RightSidebar = ({ isProfileOpen, setIsProfileOpen }) => {
-  const { selectedUser, setSelectedUser } = useContext(ChatContext);
+  const { selectedUser, setSelectedUser, messages } = useContext(ChatContext);
+  const { onlineUsers } = useContext(AuthContext);
+
+  const [media, setMedia] = useState([]);
 
   const [viewMedia, setViewMedia] = useState(false);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(0);
 
+  // Get all the images from the messages and set them to state
+  useEffect(() => {
+    setMedia(
+      messages
+        ?.filter((message) => message.image)
+        .map((message) => message.image)
+    );
+  }, [messages]);
+
   if (!isProfileOpen) return null;
 
   return (
-    <div className="flex flex-col items-center justify-start w-full px-6 py-4 border-l border-gray-600 !bg-[#8185B2]/10">
+    <div className="flex flex-col items-center justify-start w-full px-6 py-4 border-l border-gray-600 !bg-[#8185B2]/10 min-w-[200px]">
       <div className="flex items-center justify-between h-12 w-full gap-2 mb-4">
         <p className="text-sm text-white">Contact Info</p>
         <RxCross2
@@ -32,12 +45,14 @@ const RightSidebar = ({ isProfileOpen, setIsProfileOpen }) => {
         <img
           src={selectedUser?.profilePic || assets.avatar_icon}
           alt={selectedUser?.fullName}
-          className="w-36 h-36 rounded-full cursor-pointer"
+          className="w-36 aspect-square rounded-full cursor-pointer"
         />
         <div className="flex items-center justify-center gap-2 p-1">
           <span
             className={`w-2 h-2 rounded-full  ${
-              selectedUser?.online ? "bg-green-500" : "bg-red-600"
+              onlineUsers.includes(selectedUser?._id)
+                ? "bg-green-500"
+                : "bg-red-600"
             }`}
           />
           <p className="text-white text-lg mx-auto">{selectedUser?.fullName}</p>
@@ -55,7 +70,7 @@ const RightSidebar = ({ isProfileOpen, setIsProfileOpen }) => {
         </p>
         {viewMedia && (
           <div className="grid grid-cols-3 gap-2 w-full rounded-sm min-h-10 max-h-[235px] overflow-y-auto overflow-x-hidden">
-            {imagesDummyData.map((img, index) => (
+            {media.map((img, index) => (
               <div
                 className="w-full aspect-square overflow-hidden rounded-sm cursor-pointer mb-2 min-h-0"
                 key={index}
@@ -77,7 +92,7 @@ const RightSidebar = ({ isProfileOpen, setIsProfileOpen }) => {
 
       {lightboxOpen && (
         <LightboxModal
-          images={imagesDummyData}
+          images={media}
           initialIndex={selectedIndex}
           onClose={() => setLightboxOpen(false)}
         />

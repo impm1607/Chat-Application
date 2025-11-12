@@ -46,7 +46,7 @@ const ContactsMenu = ({ setIsProfileOpen }) => {
   }, [onlineUsers, messages]);
 
   return (
-    <div className="bg-[#8185B2]/10 backdrop-blur-2xl h-full p-5 rounded-r-xl overflow-y-scroll text-white border-r border-gray-600 py-5 px-3">
+    <div className="bg-[#8185B2]/10 backdrop-blur-2xl h-full p-5 rounded-r-xl overflow-y-scroll text-white border-r border-gray-600 py-5 px-3 min-w-[200px]">
       <div
         className={`w-full h-full flex flex-col items-center justify-start gap-5 ${
           selectedUser ? "px-2" : "px-4"

@@ -58,7 +58,7 @@ const ChatContainer = ({ setIsProfileOpen }) => {
   }, [messages]);
 
   return selectedUser ? (
-    <div className="relative flex flex-col w-full h-full min-h-0 pt-2 pb-14 px-2">
+    <div className="relative flex flex-col w-full h-full min-h-0 pt-2 pb-14 px-2 min-w-[220px]">
       {/* HEADER */}
       <div className="flex items-center justify-between gap-2 border-b border-gray-600 p-2 mb-2 w-full">
         <div
@@ -129,7 +129,7 @@ const ChatContainer = ({ setIsProfileOpen }) => {
                       className={`rounded-sm py-1`}
                     />
                   ) : (
-                    <p>{message.text}</p>
+                    <p className="break-words">{message.text}</p>
                   )}
                 </div>
               </div>
