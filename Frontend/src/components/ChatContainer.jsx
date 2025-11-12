@@ -1,21 +1,63 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useContext, useState } from "react";
 import { LuSendHorizontal } from "react-icons/lu";
 import logo_icon from "../assets/logo_icon.svg";
 import gallery_icon from "../assets/gallery_icon.svg";
 import assets, { messagesDummyData } from "../assets/assets";
 import { userDummyData } from "../assets/assets";
 import { formatMessageTime } from "../lib/utils";
+import { ChatContext } from "../../context/ChatContext";
+import { AuthContext } from "../../context/AuthContext";
+import toast from "react-hot-toast";
 
-const ChatContainer = ({ isSelectedUser, setIsProfileOpen }) => {
+const ChatContainer = ({ setIsProfileOpen }) => {
+  const { messages, selectedUser, setSelectedUser, getMessages, sendMessage } =
+    useContext(ChatContext);
+
+  const { authUser, onlineUsers } = useContext(AuthContext);
+
   const scrollRef = useRef();
 
+  const [input, setInput] = useState("");
+
+  // Handle sending a message
+  const handleSendMessage = async (e) => {
+    e.preventDefault();
+
+    if (input.trim() === "") return null;
+
+    await sendMessage({ text: input.trim() });
+    setInput("");
+  };
+
+  // Handle sending an image
+  const handleSendImage = async (e) => {
+    const file = e.target.files[0];
+    if (!file || !file.type.startsWith("image/")) {
+      toast.error("Please select a valid image file.");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onloadend = async () => {
+      await sendMessage({ image: reader.result });
+      e.target.value;
+    };
+    reader.readAsDataURL(file);
+  };
+
   useEffect(() => {
-    if (scrollRef.current) {
+    if (selectedUser) {
+      getMessages(selectedUser._id);
+    }
+  }, [selectedUser, messages]);
+
+  useEffect(() => {
+    if (scrollRef.current && messages) {
       scrollRef.current.scrollIntoView({ behavior: "smooth" });
     }
-  }, []);
+  }, [messages]);
 
-  return isSelectedUser ? (
+  return selectedUser ? (
     <div className="relative flex flex-col w-full h-full min-h-0 pt-2 pb-14 px-2">
       {/* HEADER */}
       <div className="flex items-center justify-between gap-2 border-b border-gray-600 p-2 mb-2 w-full">
@@ -24,15 +66,17 @@ const ChatContainer = ({ isSelectedUser, setIsProfileOpen }) => {
           onClick={() => setIsProfileOpen(true)}
         >
           <img
-            src={isSelectedUser?.profilePic}
-            alt={isSelectedUser?.fullName}
+            src={selectedUser?.profilePic || assets.avatar_icon}
+            alt={selectedUser?.fullName}
             className="w-12 h-12 rounded-full"
           />
           <div className="flex items-center justify-center gap-3 py-2">
-            <p className="text-lg text-white">{isSelectedUser?.fullName}</p>
+            <p className="text-lg text-white">{selectedUser?.fullName}</p>
             <span
               className={`w-2 h-2 rounded-full  ${
-                isSelectedUser?.online ? "bg-green-500" : "bg-red-600"
+                onlineUsers.includes(selectedUser?._id)
+                  ? "bg-green-500"
+                  : "bg-red-600"
               }`}
             />
           </div>
@@ -44,25 +88,25 @@ const ChatContainer = ({ isSelectedUser, setIsProfileOpen }) => {
 
       {/* MESSAGES */}
       <div className="flex flex-col gap-2 w-full flex-1 min-h-0 overflow-x-hidden overflow-y-scroll">
-        {messagesDummyData.map(
+        {messages?.map(
           (message, index) =>
-            (message.senderId === isSelectedUser?._id ||
-              message.receiverId === isSelectedUser?._id) && (
+            (message.senderId === selectedUser?._id ||
+              message.receiverId === selectedUser?._id) && (
               <div
                 key={index}
                 className={`flex items-start justify-start gap-2 
                 ${
-                  message.senderId === isSelectedUser?._id
-                    ? "flex-row-reverse"
-                    : ""
+                  message.senderId === selectedUser?._id
+                    ? ""
+                    : "flex-row-reverse"
                 } w-full px-1`}
               >
                 <div className="flex flex-col items-center justify-center gap-1">
                   <img
                     src={
-                      message.senderId === isSelectedUser?._id
-                        ? assets.avatar_icon
-                        : isSelectedUser?.profilePic
+                      message.senderId === selectedUser?._id
+                        ? selectedUser?.profilePic
+                        : authUser?.profilePic || assets.avatar_icon
                     }
                     alt="asd"
                     className="w-7 h-7 rounded-full"
@@ -72,8 +116,8 @@ const ChatContainer = ({ isSelectedUser, setIsProfileOpen }) => {
                   </p>
                 </div>
                 <div
-                  className={`bg-violet-500/30 text-sm text-white p-2 max-w-64 w-2/5 overflow-hidden ${
-                    message.senderId === isSelectedUser?._id
+                  className={`bg-violet-500/30 text-sm text-white px-2.5 py-2 max-w-64 w-2/5 overflow-hidden ${
+                    message.senderId === selectedUser?._id
                       ? "rounded-bl-lg rounded-tr-lg"
                       : "rounded-br-lg rounded-tl-lg"
                   }`}
@@ -82,7 +126,7 @@ const ChatContainer = ({ isSelectedUser, setIsProfileOpen }) => {
                     <img
                       src={message.image}
                       alt="message_image"
-                      className={`rounded-sm`}
+                      className={`rounded-sm py-1`}
                     />
                   ) : (
                     <p>{message.text}</p>
@@ -101,12 +145,16 @@ const ChatContainer = ({ isSelectedUser, setIsProfileOpen }) => {
             type="text"
             className="bg-transparent border-none outline-none text-white text-xs placeholder-[#c8C8c8]/50 w-full"
             placeholder="Type a message..."
+            onChange={(e) => setInput(e.target.value)}
+            value={input}
+            onKeyDown={(e) => (e.key === "Enter" ? handleSendMessage(e) : null)}
           />
           <input
             type="file"
             id="imagemsg"
             accept="image/png, image/jpeg"
             className="hidden"
+            onChange={handleSendImage}
           />
           <label htmlFor="imagemsg" className="cursor-pointer">
             <img
@@ -116,7 +164,10 @@ const ChatContainer = ({ isSelectedUser, setIsProfileOpen }) => {
             />
           </label>
         </div>
-        <button className="flex items-center justify-center h-8 w-8 rounded-full p-1 cursor-pointer">
+        <button
+          className="flex items-center justify-center h-8 w-8 rounded-full p-1 cursor-pointer"
+          onClick={handleSendMessage}
+        >
           <LuSendHorizontal className="w-full h-full text-indigo-500 text-xl" />
         </button>
       </div>

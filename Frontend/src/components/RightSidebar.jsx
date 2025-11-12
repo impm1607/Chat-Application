@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import assets, { imagesDummyData } from "../assets/assets";
 import LightboxModal from "../lib/lightboxmodal";
 import {
@@ -8,8 +8,11 @@ import {
 } from "@/components/ui/sidebar";
 import { RxCross2 } from "react-icons/rx";
 import { MdKeyboardArrowRight } from "react-icons/md";
+import { ChatContext } from "../../context/ChatContext";
 
-const RightSidebar = ({ isSelectedUser, isProfileOpen, setIsProfileOpen }) => {
+const RightSidebar = ({ isProfileOpen, setIsProfileOpen }) => {
+  const { selectedUser, setSelectedUser } = useContext(ChatContext);
+
   const [viewMedia, setViewMedia] = useState(false);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -27,21 +30,19 @@ const RightSidebar = ({ isSelectedUser, isProfileOpen, setIsProfileOpen }) => {
       </div>
       <div className="flex flex-col items-center justify-center gap-2">
         <img
-          src={isSelectedUser?.profilePic || assets.avatar_icon}
-          alt={isSelectedUser?.fullName}
+          src={selectedUser?.profilePic || assets.avatar_icon}
+          alt={selectedUser?.fullName}
           className="w-36 h-36 rounded-full cursor-pointer"
         />
         <div className="flex items-center justify-center gap-2 p-1">
           <span
             className={`w-2 h-2 rounded-full  ${
-              isSelectedUser?.online ? "bg-green-500" : "bg-red-600"
+              selectedUser?.online ? "bg-green-500" : "bg-red-600"
             }`}
           />
-          <p className="text-white text-lg mx-auto">
-            {isSelectedUser?.fullName}
-          </p>
+          <p className="text-white text-lg mx-auto">{selectedUser?.fullName}</p>
         </div>
-        <p className="text-white text-xs mx-auto">{isSelectedUser?.bio}</p>
+        <p className="text-white text-xs mx-auto">{selectedUser?.bio}</p>
       </div>
       <hr className="border-gray-600 mt-4 mb-3 w-full" />
       <div className="flex flex-col items-start justify-center w-full gap-3">
