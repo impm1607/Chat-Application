@@ -55,7 +55,7 @@ const ChatContainer = ({ setIsProfileOpen }) => {
     if (scrollRef.current && messages) {
       scrollRef.current.scrollIntoView({ behavior: "smooth" });
     }
-  }, [messages]);
+  }, []);
 
   return selectedUser ? (
     <div className="relative flex flex-col w-full h-full min-h-0 pt-2 pb-14 px-2 min-w-[220px]">
@@ -105,7 +105,7 @@ const ChatContainer = ({ setIsProfileOpen }) => {
                   <img
                     src={
                       message.senderId === selectedUser?._id
-                        ? selectedUser?.profilePic
+                        ? selectedUser?.profilePic || assets.avatar_icon
                         : authUser?.profilePic || assets.avatar_icon
                     }
                     alt="asd"

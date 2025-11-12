@@ -115,6 +115,7 @@ const ContactsMenu = ({ setIsProfileOpen }) => {
               onClick={() => {
                 setSelectedUser(user);
                 setIsProfileOpen(false);
+                setUnseenMessages((prev) => ({ ...prev, [user._id]: 0 }));
               }}
             >
               <div className="flex items-center justify-start gap-2">
