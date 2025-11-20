@@ -6,7 +6,7 @@ import { io, userSocketMap } from "../server.js";
 // Get all users except logged in user
 export const getUsersForSidebar = async (req, res) => {
   try {
-    const userId = req.user._id;
+    const userId = req.user?._id;
 
     const filteredUsers = await User.find({ _id: { $ne: userId } }).select(
       "-password"
@@ -14,15 +14,15 @@ export const getUsersForSidebar = async (req, res) => {
 
     // Count number of messages not seen
     const unseenMessages = {};
-    const promises = filteredUsers.map(async (user) => {
+    const promises = filteredUsers?.map(async (user) => {
       const messages = await Message.find({
         sender: user._id,
         receiver: userId,
         seen: false,
       });
 
-      if (messages.length > 0) {
-        unseenMessages[user._id] = messages.length;
+      if (messages?.length > 0) {
+        unseenMessages[user._id] = messages?.length;
       }
     });
 
@@ -45,7 +45,7 @@ export const getUsersForSidebar = async (req, res) => {
 export const getMessages = async (req, res) => {
   try {
     const { id: selectedUserId } = req.params;
-    const myId = req.user._id;
+    const myId = req.user?._id;
 
     const messages = await Message.find({
       $or: [

@@ -28,11 +28,11 @@ export const signup = async (req, res) => {
       bio,
     });
 
-    const token = generateToken(newUser._id);
+    const token = generateToken(newUser?._id);
 
     res.json({
       success: true,
-      userData: newUser,
+      user: newUser,
       token,
       message: "User created successfully",
     });
@@ -58,11 +58,11 @@ export const login = async (req, res) => {
       return res.json({ success: false, message: "Invalid credentials" });
     }
 
-    const token = generateToken(userData._id);
+    const token = generateToken(userData?._id);
 
     res.json({
       success: true,
-      userData,
+      user: userData,
       token,
       message: "Login Successful",
     });
@@ -86,7 +86,7 @@ export const updateProfile = async (req, res) => {
   try {
     const { profilePic, fullName, bio } = req.body;
 
-    const userId = req.user._id;
+    const userId = req.user?._id;
 
     let updatedUser;
 

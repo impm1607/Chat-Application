@@ -17,7 +17,7 @@ import { ChatContext } from "../../context/ChatContext";
 import { useState } from "react";
 
 const ContactsMenu = ({ setIsProfileOpen }) => {
-  const { logout, onlineUsers } = useContext(AuthContext);
+  const { socket, logout, onlineUsers } = useContext(AuthContext);
 
   const {
     messages,
@@ -33,17 +33,34 @@ const ContactsMenu = ({ setIsProfileOpen }) => {
 
   const navigate = useNavigate();
 
-  const [input, setInput] = useState(false);
+  const [input, setInput] = useState("");
 
   const filteredUsers = input
-    ? users.filter((user) =>
-        user.fullName.toLowerCase().includes(input.toLowerCase())
+    ? users?.filter((user) =>
+        user?.fullName?.toLowerCase().includes(input.toLowerCase())
       )
     : users;
 
   useEffect(() => {
     getUsers();
-  }, [onlineUsers, messages]);
+  }, []);
+
+  // Socket event listeners to update user list on status changes without calling the getUsers function repeatedly (unnecessary API calls)
+  useEffect(() => {
+    if (!socket) return;
+
+    const updateUsers = () => getUsers();
+
+    socket.on("user:online", updateUsers);
+    socket.on("user:offline", updateUsers);
+    socket.on("user:registered", updateUsers);
+
+    return () => {
+      socket.off("user:online", updateUsers);
+      socket.off("user:offline", updateUsers);
+      socket.off("user:registered", updateUsers);
+    };
+  }, [socket]);
 
   return (
     <div className="bg-[#8185B2]/10 backdrop-blur-2xl h-full p-5 rounded-r-xl overflow-y-scroll text-white border-r border-gray-600 py-5 px-3 min-w-[200px]">
@@ -110,12 +127,12 @@ const ContactsMenu = ({ setIsProfileOpen }) => {
             <div
               key={index}
               className={`flex items-center justify-between w-full gap-1 py-2 px-3 rounded-lg cursor-pointer hover:bg-[#282142]/30 ${
-                selectedUser?._id === user._id && "bg-[#282142]/70"
+                selectedUser?._id === user?._id && "bg-[#282142]/70"
               }`}
               onClick={() => {
                 setSelectedUser(user);
                 setIsProfileOpen(false);
-                setUnseenMessages((prev) => ({ ...prev, [user._id]: 0 }));
+                setUnseenMessages((prev) => ({ ...prev, [user?._id]: 0 }));
               }}
             >
               <div className="flex items-center justify-start gap-2">
@@ -132,18 +149,18 @@ const ContactsMenu = ({ setIsProfileOpen }) => {
                   </p>
                   <p
                     className={`flex items-center justify-start gap-2 text-[10px] ${
-                      onlineUsers.includes(user?._id)
+                      onlineUsers?.includes(user?._id)
                         ? "text-green-600 italic"
                         : "text-red-700"
                     }`}
                   >
-                    {onlineUsers.includes(user?._id) ? "Online" : "Offline"}
+                    {onlineUsers?.includes(user?._id) ? "Online" : "Offline"}
                   </p>
                 </div>
               </div>
-              {unseenMessages[user._id] > 0 && (
+              {unseenMessages[user?._id] > 0 && (
                 <div className="flex items-center justify-center text-xs text-white/70 w-5 h-5 rounded-full bg-purple-600/30 overflow-hidden shrink-0">
-                  {unseenMessages[user._id]}
+                  {unseenMessages[user?._id]}
                 </div>
               )}
             </div>

@@ -8,8 +8,8 @@ const ProfilePage = () => {
 
   const [selectedAvatar, setSelectedAvatar] = useState(null);
   const navigate = useNavigate();
-  const [name, setName] = useState(authUser.fullName);
-  const [bio, setBio] = useState(authUser.bio);
+  const [name, setName] = useState(authUser?.fullName);
+  const [bio, setBio] = useState(authUser?.bio);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -86,7 +86,7 @@ const ProfilePage = () => {
                 src={
                   selectedAvatar
                     ? URL.createObjectURL(selectedAvatar)
-                    : authUser.profilePic || assets.avatar_icon
+                    : authUser?.profilePic || assets.avatar_icon
                 }
                 alt="avatar"
                 className="w-full h-full rounded-full object-cover"

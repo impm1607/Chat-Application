@@ -40,22 +40,20 @@ const ChatContainer = ({ setIsProfileOpen }) => {
     const reader = new FileReader();
     reader.onloadend = async () => {
       await sendMessage({ image: reader.result });
-      e.target.value;
+      e.target.value = null;
     };
     reader.readAsDataURL(file);
   };
 
   useEffect(() => {
     if (selectedUser) {
-      getMessages(selectedUser._id);
+      getMessages(selectedUser?._id);
     }
-  }, [selectedUser, messages]);
+  }, [selectedUser]);
 
   useEffect(() => {
-    if (scrollRef.current && messages) {
-      scrollRef.current.scrollIntoView({ behavior: "smooth" });
-    }
-  }, []);
+    scrollRef?.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
   return selectedUser ? (
     <div className="relative flex flex-col w-full h-full min-h-0 pt-2 pb-14 px-2 min-w-[220px]">

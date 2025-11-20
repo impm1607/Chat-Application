@@ -10,7 +10,7 @@ const HomePage = () => {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
 
   return (
-    <div className="w-screen h-screen sm:px-[10%] sm:py-[5%]">
+    <div className="w-screen h-screen sm:px-[6%] sm:py-[5%]">
       <div
         className={`relative grid grid-cols-1 w-full h-full backdrop-blur-2xl border-2 border-gray-600 rounded-2xl overflow-hidden bg-black/25
           ${!isProfileOpen && !selectedUser ? "grid-cols-[1fr_1.25fr]" : ""}

@@ -30,7 +30,7 @@ const RightSidebar = ({ isProfileOpen, setIsProfileOpen }) => {
     );
   }, [messages]);
 
-  if (!isProfileOpen) return null;
+  if (!isProfileOpen || !selectedUser) return null;
 
   return (
     <div className="flex flex-col items-center justify-start w-full px-6 py-4 border-l border-gray-600 !bg-[#8185B2]/10 min-w-[200px]">
@@ -50,7 +50,7 @@ const RightSidebar = ({ isProfileOpen, setIsProfileOpen }) => {
         <div className="flex items-center justify-center gap-2 p-1">
           <span
             className={`w-2 h-2 rounded-full  ${
-              onlineUsers.includes(selectedUser?._id)
+              onlineUsers?.includes(selectedUser?._id)
                 ? "bg-green-500"
                 : "bg-red-600"
             }`}
