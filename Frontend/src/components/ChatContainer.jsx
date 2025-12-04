@@ -8,6 +8,7 @@ import { formatMessageTime } from "../lib/utils";
 import { ChatContext } from "../../context/ChatContext";
 import { AuthContext } from "../../context/AuthContext";
 import toast from "react-hot-toast";
+import LightboxModal from "../lib/lightboxmodal";
 
 const ChatContainer = ({ setIsProfileOpen }) => {
   const { messages, selectedUser, setSelectedUser, getMessages, sendMessage } =
@@ -18,10 +19,27 @@ const ChatContainer = ({ setIsProfileOpen }) => {
   const scrollRef = useRef();
 
   const [input, setInput] = useState("");
+  const [lightboxImage, setLightboxImage] = useState(null);
+  const [previewImage, setPreviewImage] = useState(null);
 
   // Handle sending a message
   const handleSendMessage = async (e) => {
     e.preventDefault();
+
+    if (previewImage) {
+      const img = previewImage;
+      const caption = input.trim();
+
+      setPreviewImage(null);
+      setInput("");
+
+      await sendMessage({
+        image: img,
+        text: caption || "",
+      });
+
+      return;
+    }
 
     if (input.trim() === "") return null;
 
@@ -39,10 +57,12 @@ const ChatContainer = ({ setIsProfileOpen }) => {
 
     const reader = new FileReader();
     reader.onloadend = async () => {
-      await sendMessage({ image: reader.result });
-      e.target.value = null;
+      setPreviewImage(reader.result);
     };
+
     reader.readAsDataURL(file);
+
+    e.target.value = null;
   };
 
   useEffect(() => {
@@ -56,7 +76,7 @@ const ChatContainer = ({ setIsProfileOpen }) => {
   }, [messages]);
 
   return selectedUser ? (
-    <div className="relative flex flex-col w-full h-full min-h-0 pt-2 pb-14 px-2 min-w-[220px]">
+    <div className="relative flex flex-col gap-1 w-full h-full min-h-0 pt-2 pb-14 px-2 min-w-[220px]">
       {/* HEADER */}
       <div className="flex items-center justify-between gap-2 border-b border-gray-600 p-2 mb-2 w-full">
         <div
@@ -84,57 +104,86 @@ const ChatContainer = ({ setIsProfileOpen }) => {
         </button>
       </div>
 
-      {/* MESSAGES */}
-      <div className="flex flex-col gap-2 w-full flex-1 min-h-0 overflow-x-hidden overflow-y-scroll">
-        {messages?.map(
-          (message, index) =>
-            (message.senderId === selectedUser?._id ||
-              message.receiverId === selectedUser?._id) && (
-              <div
-                key={index}
-                className={`flex items-start justify-start gap-2 
+      {previewImage ? (
+        <>
+          {/* IMAGE PREVIEW */}
+          <div
+            className={`relative inline-flex justify-center items-center bg-violet-500/20 h-full w-full backdrop-blur-3xl text-sm rounded-md text-white p-2.5 overflow-hidden`}
+          >
+            <img
+              src={previewImage}
+              alt="preview"
+              className="rounded-md max-w-full max-h-full object-contain"
+            />
+
+            <button
+              onClick={() => {
+                setPreviewImage(null);
+                setInput("");
+              }}
+              className="absolute top-1 right-2 text-white/50 hover:text-white"
+            >
+              ✕
+            </button>
+          </div>
+        </>
+      ) : (
+        <>
+          {/* MESSAGES */}
+          <div className="flex flex-col gap-2 w-full flex-1 min-h-0 overflow-x-hidden overflow-y-scroll">
+            {messages?.map(
+              (message, index) =>
+                (message.senderId === selectedUser?._id ||
+                  message.receiverId === selectedUser?._id) && (
+                  <div
+                    key={index}
+                    className={`flex items-start justify-start gap-2 
                 ${
                   message.senderId === selectedUser?._id
                     ? ""
                     : "flex-row-reverse"
                 } w-full px-1`}
-              >
-                <div className="flex flex-col items-center justify-center gap-1">
-                  <img
-                    src={
-                      message.senderId === selectedUser?._id
-                        ? selectedUser?.profilePic || assets.avatar_icon
-                        : authUser?.profilePic || assets.avatar_icon
-                    }
-                    alt="asd"
-                    className="w-7 h-7 rounded-full"
-                  />
-                  <p className="text-xs text-white/40">
-                    {formatMessageTime(message.createdAt)}
-                  </p>
-                </div>
-                <div
-                  className={`bg-violet-500/30 text-sm text-white px-2.5 py-2 max-w-64 w-2/5 overflow-hidden ${
-                    message.senderId === selectedUser?._id
-                      ? "rounded-bl-lg rounded-tr-lg"
-                      : "rounded-br-lg rounded-tl-lg"
-                  }`}
-                >
-                  {message.image ? (
-                    <img
-                      src={message.image}
-                      alt="message_image"
-                      className={`rounded-sm py-1`}
-                    />
-                  ) : (
-                    <p className="break-words">{message.text}</p>
-                  )}
-                </div>
-              </div>
-            )
-        )}
-        <div ref={scrollRef} />
-      </div>
+                  >
+                    <div className="flex flex-col items-center justify-center gap-1">
+                      <img
+                        src={
+                          message.senderId === selectedUser?._id
+                            ? selectedUser?.profilePic || assets.avatar_icon
+                            : authUser?.profilePic || assets.avatar_icon
+                        }
+                        alt="asd"
+                        className="w-7 h-7 rounded-full"
+                      />
+                      <p className="text-xs text-white/40">
+                        {formatMessageTime(message.createdAt)}
+                      </p>
+                    </div>
+                    <div
+                      className={`flex flex-col bg-violet-500/30 text-sm text-white px-2.5 py-2 max-w-64 w-2/5 overflow-hidden ${
+                        message.senderId === selectedUser?._id
+                          ? "rounded-bl-lg rounded-tr-lg"
+                          : "rounded-br-lg rounded-tl-lg"
+                      }`}
+                    >
+                      {message.image && (
+                        <img
+                          src={message.image}
+                          alt="message_image"
+                          className={`rounded-sm py-1`}
+                          onDoubleClick={() => setLightboxImage(message.image)}
+                        />
+                      )}
+                      {message.text && (
+                        <p className="break-words">{message.text}</p>
+                      )}
+                    </div>
+                  </div>
+                )
+            )}
+          </div>
+          <div ref={scrollRef} />
+        </>
+      )}
 
       {/* INPUT BOX */}
       <div className="absolute bottom-1 left-0 right-0 flex items-center justify-between gap-2 w-full px-3 mb-2 mt-2">
@@ -145,7 +194,12 @@ const ChatContainer = ({ setIsProfileOpen }) => {
             placeholder="Type a message..."
             onChange={(e) => setInput(e.target.value)}
             value={input}
-            onKeyDown={(e) => (e.key === "Enter" ? handleSendMessage(e) : null)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                handleSendMessage(e);
+              }
+            }}
           />
           <input
             type="file"
@@ -169,6 +223,14 @@ const ChatContainer = ({ setIsProfileOpen }) => {
           <LuSendHorizontal className="w-full h-full text-indigo-500 text-xl" />
         </button>
       </div>
+
+      {lightboxImage && (
+        <LightboxModal
+          images={[lightboxImage]}
+          initialIndex={0}
+          onClose={() => setLightboxImage(null)}
+        />
+      )}
     </div>
   ) : (
     <div className="w-full h-full flex flex-col items-center justify-center gap-4">
