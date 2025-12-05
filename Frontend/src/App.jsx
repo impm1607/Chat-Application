@@ -5,24 +5,44 @@ import LoginPage from "./pages/LoginPage";
 import ProfilePage from "./pages/ProfilePage";
 import { Toaster } from "react-hot-toast";
 import { AuthContext } from "../context/AuthContext";
+import ProtectedRoute from "./routes/ProtectedRoute";
 
 const App = () => {
-  const { authUser } = useContext(AuthContext);
+  const { authUser, loading } = useContext(AuthContext);
+
+  if (loading) {
+    return (
+      <>
+        <div className="fixed inset-0 flex items-center justify-center bg-black/80 backdrop-blur-sm">
+          <div className="border-t-transparent border-4 border-white rounded-full w-10 h-10 animate-spin"></div>
+        </div>
+      </>
+    );
+  }
+
   return (
     <div className="bg-[url('/bgImage.svg')] bg-contain">
       <Toaster />
       <Routes>
         <Route
           path="/"
-          element={authUser ? <HomePage /> : <Navigate to="/login" />}
+          element={
+            <ProtectedRoute>
+              <HomePage />
+            </ProtectedRoute>
+          }
         />
         <Route
           path="/login"
-          element={!authUser ? <LoginPage /> : <Navigate to="/" />}
+          element={authUser ? <Navigate to="/" /> : <LoginPage />}
         />
         <Route
           path="/profile"
-          element={authUser ? <ProfilePage /> : <Navigate to="/login" />}
+          element={
+            <ProtectedRoute>
+              <ProfilePage />
+            </ProtectedRoute>
+          }
         />
       </Routes>
     </div>
